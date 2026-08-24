@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Study Nook</title>
+  <style>
+    :root { --ink:#30413b; --muted:#79877e; --paper:#fffdf7; --cream:#faf4e6; --green:#e8f1df; --green-strong:#b9d7bd; --blue:#e5f0f5; --blue-strong:#bfdce5; --yellow:#fff2bf; --pink:#f8e8e0; --line:#e7e5db; --shadow:0 12px 40px rgba(86,91,72,.07); }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:var(--ink); background:var(--paper); font-size:14px; }
+    button,input,textarea,select { font:inherit; color:inherit; }
+    .app { min-height:100vh; display:grid; grid-template-columns:250px minmax(0,1fr); }
+    .sidebar { position:sticky; top:0; align-self:start; height:100vh; width:250px; padding:28px 16px; background:linear-gradient(155deg,#edf5e5 0%,#e7f0df 56%,#f8f0d9 100%); border-right:1px solid rgba(104,135,109,.12); display:flex; flex-direction:column; }
+    .brand { display:flex; align-items:center; gap:10px; padding:0 10px; font-weight:700; letter-spacing:-.02em; font-size:17px; }
+    .brand-mark { width:34px; height:34px; border-radius:11px; background:linear-gradient(135deg,#fff0ae,#f9e7a5); display:grid; place-items:center; box-shadow:inset 0 0 0 1px rgba(172,149,69,.14),0 3px 10px rgba(168,144,64,.12); }
+    .brand-mark svg { width:22px; height:22px; stroke:#3d6456; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; fill:none; }
+    .brand-mark .leaf { fill:#b9d7bd; stroke:#5d8771; }
+    .sidebar-label { font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:#7c8b78; margin:37px 10px 10px; }
+    .nav-link { display:flex; align-items:center; gap:11px; padding:11px 12px; border:0; border-radius:10px; background:transparent; cursor:pointer; text-align:left; width:100%; color:#4d5c52; transition:.2s; }
+    .nav-link:hover,.nav-link.active { background:rgba(228,240,245,.88); color:#284f5c; }
+    .nav-icon { width:19px; text-align:center; font-size:16px; }
+    .tiny-list { margin-top:13px; padding:0 12px; color:#839087; font-size:12px; line-height:2.1; }
+    .profile { margin-top:auto; background:rgba(255,253,247,.52); border:1px solid rgba(104,135,109,.13); border-radius:14px; padding:12px; display:flex; gap:10px; align-items:center; }
+    .avatar { width:30px; height:30px; border-radius:50%; background:var(--pink); display:grid; place-items:center; }
+    .profile b { display:block; font-size:12px; } .profile span { color:var(--muted); font-size:11px; }
+    .main { min-width:0; background:var(--paper); }
+    .topbar { height:72px; padding:0 48px; border-bottom:1px solid #f0eee7; display:flex; align-items:center; justify-content:space-between; }
+    .crumbs { color:var(--muted); font-size:13px; } .crumbs b { color:#4c5d54; font-weight:600; } .sep { margin:0 8px; color:#b6bcb3; }
+    .ask { border:0; background:var(--blue); border-radius:10px; padding:10px 15px; cursor:pointer; font-weight:600; color:#355561; transition:.2s; }
+    .ask:hover { background:var(--blue-strong); transform:translateY(-1px); }
+    .canvas { max-width:1030px; margin:auto; padding:64px 48px 70px; }
+    .eyebrow { color:#849287; font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; margin-bottom:17px; }
+    h1 { margin:0; font-size:42px; line-height:1.12; letter-spacing:-.045em; outline:0; font-weight:750; }
+    h1:focus { box-shadow:0 2px 0 var(--green-strong); }
+    .meta-row { display:flex; align-items:center; gap:10px; margin:19px 0 45px; }
+    .meta-label { color:var(--muted); font-size:12px; } .profile-select { border:1px solid var(--line); background:#fffefa; border-radius:8px; padding:7px 28px 7px 10px; font-size:12px; cursor:pointer; }
+    .workspace { display:grid; grid-template-columns:minmax(0,1.45fr) minmax(280px,.78fr); gap:28px; align-items:start; }
+    .note-area { min-height:290px; width:100%; resize:vertical; padding:21px; border:1px solid var(--line); border-radius:15px; outline:none; line-height:1.7; background:#fffefa; transition:.2s; box-shadow:var(--shadow); }
+    .note-area:focus { border-color:var(--green-strong); box-shadow:0 0 0 4px rgba(185,215,189,.2); }
+    .note-area::placeholder { color:#a7afa7; }
+    .note-tools { margin-top:12px; display:flex; justify-content:space-between; align-items:center; color:var(--muted); font-size:12px; }
+    .save-state { display:flex; align-items:center; gap:6px; } .dot { width:7px; height:7px; border-radius:50%; background:#bfd9b8; }
+    .output { min-height:110px; margin-top:32px; padding:17px 20px; border-radius:13px; background:linear-gradient(100deg,#fff9df,#f4f7e9); border:1px dashed #e3dcb8; color:#6f766c; line-height:1.55; }
+    .output strong { color:#596657; font-size:12px; display:block; margin-bottom:4px; }
+    .ai-panel { background:#fbfaf3; border:1px solid #eeeade; border-radius:17px; overflow:hidden; box-shadow:var(--shadow); }
+    .ai-top { padding:17px 18px 13px; display:flex; justify-content:space-between; align-items:center; } .ai-title { font-weight:700; } .sparkle { color:#ba9c31; }
+    .modes { display:flex; gap:6px; padding:0 14px 14px; border-bottom:1px solid #efede4; }
+    .mode { flex:1; border:0; border-radius:8px; background:transparent; padding:8px 5px; font-size:12px; cursor:pointer; color:#6c796f; }
+    .mode.active,.mode:hover { background:var(--blue); color:#365864; }
+    .chat { min-height:238px; padding:17px; display:flex; flex-direction:column; gap:12px; }
+    .bubble { padding:10px 12px; max-width:91%; line-height:1.45; font-size:12px; border-radius:11px; }
+    .bubble.ai { background:var(--green); border-bottom-left-radius:3px; } .bubble.user { background:var(--blue); align-self:flex-end; border-bottom-right-radius:3px; }
+    .suggestions { display:flex; flex-wrap:wrap; gap:7px; margin-top:auto; } .suggestion { border:1px solid #e2e8df; background:#fffefa; padding:6px 8px; border-radius:8px; cursor:pointer; color:#617067; font-size:11px; }
+    .suggestion:hover { background:var(--blue); }
+    .chat-input { border-top:1px solid #efede4; padding:12px; display:flex; gap:8px; } .chat-input input { min-width:0; flex:1; border:1px solid var(--line); background:white; border-radius:9px; padding:9px 10px; outline-color:var(--green-strong); font-size:12px; } .send { width:35px; border:0; border-radius:9px; background:var(--yellow); cursor:pointer; }
+    /* Move to the compact layout before either workspace column becomes cramped. */
+    @media(max-width:1100px) { .app{grid-template-columns:1fr}.sidebar{position:static;width:auto; height:auto; padding:14px; flex-direction:row; align-items:center; gap:8px}.sidebar-label,.tiny-list,.profile{display:none}.brand{margin-right:auto}.nav-link{width:auto}.nav-link span:last-child{display:none}.topbar{padding:0 22px}.canvas{padding:42px 22px}.workspace{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.5 7.8c2.7-1.5 5-.8 7.5.9v10c-2.4-1.5-4.8-2-7.5-.7z"/><path d="M19.5 7.8c-2.7-1.5-5-.8-7.5.9v10c2.4-1.5 4.8-2 7.5-.7z"/><path d="M12 8.7V5.2"/><path class="leaf" d="M12 5.3c.2-2 1.5-3 3.5-3.3-.2 2-1.5 3.1-3.5 3.3z"/></svg></span> study nook</div>
+      <div class="sidebar-label">Workspace</div>
+      <button class="nav-link active"><span class="nav-icon">▤</span><span>Smart Notebook</span></button>
+      <button class="nav-link"><span class="nav-icon">◫</span><span>Study Sets</span></button>
+      <div class="tiny-list">All notes<br>Recently edited<br>Shared with me</div>
+      <div class="profile"><div class="avatar">☻</div><div><b>My learning space</b><span>Free plan</span></div></div>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div class="crumbs"><b>Smart Notebook</b><span class="sep">/</span>New note</div><button class="ask" id="askButton">✨ Ask AI</button></header>
+      <div class="canvas">
+        <div class="eyebrow">Personal notebook</div>
+        <h1 contenteditable="true" aria-label="Note title">Untitled Notes</h1>
+        <div class="meta-row"><span class="meta-label">Target Profile</span><select class="profile-select" aria-label="Target profile"><option>Elementary</option><option>Middle School</option><option selected>High School</option><option>College</option></select></div>
+        <section class="workspace">
+          <div>
+            <textarea id="notes" class="note-area" placeholder="Start writing your ideas, class notes, or a topic you want to understand…"></textarea>
+            <div class="note-tools"><span class="save-state"><i class="dot"></i> Saved locally</span><span id="count">0 words</span></div>
+            <div class="output" id="output" aria-live="polite"><strong>AI output will appear here</strong>Ask for a summary, a study guide, or a set of practice questions when you’re ready.</div>
+          </div>
+          <aside class="ai-panel">
+            <div class="ai-top"><span class="ai-title"><span class="sparkle">✦</span> Study assistant</span><span style="color:#99a498;font-size:11px">online</span></div>
+            <div class="modes"><button class="mode active" data-mode="notes">Generate notes</button><button class="mode" data-mode="questions">Questions</button><button class="mode" data-mode="mcqs">MCQs</button></div>
+            <div class="chat" id="chat"><div class="bubble ai" id="welcome">Share a topic or add your raw notes. I’ll help you turn them into something you can learn from.</div><div class="suggestions"><button class="suggestion">Make a study guide</button><button class="suggestion">Explain simply</button><button class="suggestion">Test me</button></div></div>
+            <form class="chat-input" id="chatForm"><input id="prompt" placeholder="Ask anything…" aria-label="Ask study assistant"><button class="send" aria-label="Send">↑</button></form>
+          </aside>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script>
+    const notes=document.getElementById('notes'), count=document.getElementById('count'), output=document.getElementById('output'), chat=document.getElementById('chat'), prompt=document.getElementById('prompt'), modes=[...document.querySelectorAll('.mode')];
+    let mode='notes';
+    function words(){ count.textContent=(notes.value.trim().match(/\S+/g)||[]).length+' words'; }
+    function response(text){ const subject=notes.value.trim()||text||'your topic'; const label=mode==='mcqs'?'Practice MCQs':mode==='questions'?'Study questions':'Study notes'; const body=mode==='mcqs'?`1. What is the main idea in “${subject.slice(0,58)}”?\nA. …  B. …  C. …  D. …\n\n2. Which detail best supports the key concept?`:mode==='questions'?`• What are the 3 key concepts in ${subject.slice(0,70)}?\n• Why does this topic matter?\n• Can you explain it in your own words?`:`Here’s a focused starting outline for ${subject.slice(0,70)}:\n\n• Main idea\n• Key terms and connections\n• One example to remember`;
+      output.innerHTML='<strong>'+label+'</strong>'+body.replace(/\n/g,'<br>'); const b=document.createElement('div'); b.className='bubble ai'; b.textContent='I created '+label.toLowerCase()+' based on your notes.'; chat.insertBefore(b,chat.querySelector('.suggestions')); }
+    notes.addEventListener('input',words);
+    modes.forEach(x=>x.addEventListener('click',()=>{modes.forEach(b=>b.classList.remove('active'));x.classList.add('active');mode=x.dataset.mode;document.getElementById('welcome').textContent=mode==='mcqs'?'I’ll make quick, balanced multiple-choice questions from your notes.':mode==='questions'?'I’ll help you test your understanding with thoughtful questions.':'I’ll shape your ideas into clear, organized notes.';}));
+    document.getElementById('askButton').addEventListener('click',()=>prompt.focus());
+    document.querySelectorAll('.suggestion').forEach(x=>x.addEventListener('click',()=>{prompt.value=x.textContent; prompt.focus();}));
+    document.getElementById('chatForm').addEventListener('submit',e=>{e.preventDefault();if(!prompt.value.trim())return;const u=document.createElement('div');u.className='bubble user';u.textContent=prompt.value;chat.insertBefore(u,chat.querySelector('.suggestions'));response(prompt.value);prompt.value='';});
+  </script>
+</body>
+</html>
